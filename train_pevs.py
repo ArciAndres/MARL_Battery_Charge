@@ -11,12 +11,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 from tensorboardX import SummaryWriter
 
-from envs import MPEEnv
+#from envs import MPEEnv
 
 from algorithm.ppo import PPO
 from algorithm.model import Policy
 
-from config_drones_mpe import get_config
+from pev_battery_charge.envs.config_pev import get_config
+from pev_battery_charge.envs import PEVBatteryCharge
+
 #from config import get_config
 from utils.env_wrappers import SubprocVecEnv, DummyVecEnv
 from utils.util import update_linear_schedule
@@ -47,8 +49,8 @@ from utils_training import reset_rollouts
 def make_parallel_env(args):
     def get_env_fn(rank):
         def init_env():
-            if args.env_name == "MPE":
-                env = MPEEnv(args)
+            if args.env_name == "BatteryCharge":
+                env = PEVBatteryCharge(args)
             else:
                 print("Can not support the " + args.env_name + "environment." )
                 raise NotImplementedError
