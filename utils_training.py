@@ -136,8 +136,9 @@ def generate_gif(actor_critic, args, gif_name, n_eps = 1):
             # Obser reward and next obs
             obs, rewards, dones, infos, _ = envs.step(actions_env[0])
             obs = np.array(obs)
-            images.append(envs.render(mode='rgb_array', close=False)[0])
-
+            images.append(envs.render(plots=[1,2,3,4,5], mode='rgb_array'))
+            if step % 10 == 0:
+                print(str(step)+", ", end='')
             # If done then clean the history of observations.
             # insert data in buffer
             masks = []

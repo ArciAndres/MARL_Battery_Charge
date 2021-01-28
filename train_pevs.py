@@ -1,5 +1,3 @@
-import copy
-import glob
 import os
 import time
 import numpy as np
@@ -7,8 +5,6 @@ from pathlib import Path
 import json
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 from tensorboardX import SummaryWriter
 
 #from envs import MPEEnv
@@ -24,7 +20,6 @@ from utils.env_wrappers import SubprocVecEnv, DummyVecEnv
 from utils.util import update_linear_schedule
 from utils.storage import RolloutStorage
 from utils.single_storage import SingleRolloutStorage
-import shutil
 import numpy as np
 import itertools
 import os
@@ -33,7 +28,6 @@ from pdb import set_trace
 # Save gifs imports
 from pyvirtualdisplay import Display
 from time import sleep
-import imageio
 from argparse import Namespace
 from utils_training import generate_gif
 
@@ -45,7 +39,6 @@ from utils_training import reset_rollouts
 
 #%%
 
-#INITIAL_XYZ = np.array([[-sep ,0,0],[0,0,0],[sep,0,0 ]])
 def make_parallel_env(args):
     def get_env_fn(rank):
         def init_env():
@@ -54,7 +47,7 @@ def make_parallel_env(args):
             else:
                 print("Can not support the " + args.env_name + "environment." )
                 raise NotImplementedError
-            env.seed(args.seed + rank * 1000)
+            env.set_seed(args.seed + rank * 1000)
             # np.random.seed(args.seed + rank * 1000)
             return env
         return init_env
@@ -360,6 +353,7 @@ def main():
                 
             # Obser reward and next obs
             obs, rewards, dones, infos, _ = envs.step(actions_env)
+            
             obs = np.array(obs)
             # If done then clean the history of observations.
             # insert data in buffer
@@ -497,11 +491,11 @@ def main():
     
             with open(run_dir / 'models' / 'train_checkpoint.json', 'w') as f:
                 json.dump(train_checkpoint, f)
-    
-        if (episode % args.save_gifs_interval == 0 or episode == episodes - 1):
-            print("Saving gif...")
-            gif_name = gif_dir / ("step"+ str(episode)+".gif")
-            generate_gif(actor_critic, args, gif_name, n_eps=3)
+        if args.save_gifs:
+            if (episode % args.save_gifs_interval == 0 or episode == episodes - 1):
+                print("Saving gif...")
+                gif_name = gif_dir / ("step"+ str(episode)+".gif")
+                generate_gif(actor_critic, args, gif_name, n_eps=3)
     
     
         # log information
@@ -526,13 +520,13 @@ def main():
                 table_[0].append('Loss of agent%i')
                 table_[1].append(round(value_losses[agent_id], 3))
             
-            if args.env_name == "MPE" or args.env_name == 'drones':
+            if args.env_name == "MPE" or args.env_name == 'BatteryCharge':
                 for agent_id in range(num_agents):
                     table_[0].append('Reward (%s)' % agent_id)
                     
                     show_rewards = []
                     for info in infos:                        
-                        if 'individual_reward' in info[agent_id].keys():
+                        if 'rewards_info_sum' in info[agent_id].keys():
                             show_rewards.append(info[agent_id]['individual_reward'])                    
     
                     reward_mean = np.mean(show_rewards)
