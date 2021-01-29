@@ -24,6 +24,7 @@ import numpy as np
 import itertools
 import os
 from pdb import set_trace
+import math
 
 # Save gifs imports
 from pyvirtualdisplay import Display
@@ -120,6 +121,8 @@ def main():
     log_dir = run_dir / 'logs'
     save_dir = run_dir / 'models'
     gif_dir = run_dir / 'media'
+    
+    args.episode_length = math.floor((args.total_time/args.sampling_time))
     
     if not restore:
         os.makedirs(str(log_dir))
@@ -270,7 +273,9 @@ def main():
         print(">>> VIRTUAL DISPLAY STARTED")
     
     start = time.time()
+    
     episodes = int(args.num_env_steps) // args.episode_length // args.n_rollout_threads
+    
     
     print("============================  TRAINING BEGINS ============================\n")
     print("Run directory:" , run_dir, '\n')
