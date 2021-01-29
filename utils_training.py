@@ -14,7 +14,8 @@ from utils.single_storage import SingleRolloutStorage
 import torch
 import itertools
 import numpy as np
-
+from multiprocessing import Process
+from datetime import datetime
 # replay buffer 
 
 def reset_rollouts(rollouts, envs, args):
@@ -40,9 +41,17 @@ def reset_rollouts(rollouts, envs, args):
     
     return rollouts
 
+def gif_assembling(gif_name, images):
+    start = datetime.now()
+    print(start, " - Gif assembling process started parallelly.")
+    imageio.mimsave(gif_name, np.array(images), fps=20)
+    
+    print("Gif assembling process finished. Time to completion: ", str(datetime.now() - start))
+    print(">> Gif rendering was successfully saved at: ", gif_name)
+    
 
 
-def generate_gif(actor_critic, args, gif_name, n_eps = 1):
+def generate_gif(actor_critic, args, gif_name, n_eps = 1, parallel=False):
 
     args = Namespace(**vars(args).copy()) # For security
     args.n_rollout_threads = 1
@@ -180,10 +189,16 @@ def generate_gif(actor_critic, args, gif_name, n_eps = 1):
                             np.array(values[agent_id]),
                             rewards[:,agent_id], 
                             np.array(masks)[:,agent_id])
+    if parallel:
+        proc = Process(target=gif_assembling, args=(gif_name, images))
+        
+    else:
+        start = datetime.now()
+        print(start, " - Gif assembling process started.")
+        imageio.mimsave(gif_name, np.array(images), fps=20)
+        
+        print("Gif assembling process finished. Time to completion: ", str(datetime.now() - start))
 
-    
-    imageio.mimsave(gif_name, np.array(images), fps=20)
-    print(">> Gif rendering was successfully saved at: ", gif_name)
     return str(gif_name)
 
 def load_gif(gif_name):

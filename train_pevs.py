@@ -495,7 +495,8 @@ def main():
             if (episode % args.save_gifs_interval == 0 or episode == episodes - 1):
                 print("Saving gif...")
                 gif_name = gif_dir / ("step"+ str(episode)+".gif")
-                generate_gif(actor_critic, args, gif_name, n_eps=3)
+                
+                generate_gif(actor_critic, args, gif_name, n_eps=3, parallel=False)
     
     
         # log information
@@ -521,18 +522,16 @@ def main():
                 table_[1].append(round(value_losses[agent_id], 3))
             
             if args.env_name == "MPE" or args.env_name == 'BatteryCharge':
+                show_rewards = [i['rewards_info_sum'] for i in infos]
+                show_rewards = np.mean(show_rewards, axis=0)
+                
                 for agent_id in range(num_agents):
                     table_[0].append('Reward (%s)' % agent_id)
-                    
-                    show_rewards = []
-                    for info in infos:                        
-                        if 'rewards_info_sum' in info[agent_id].keys():
-                            show_rewards.append(info[agent_id]['individual_reward'])                    
-    
-                    reward_mean = np.mean(show_rewards)
-                    table_[1].append(round(reward_mean, 3))
-                    logger.add_scalars('agent%i/individual_reward' % agent_id, {'individual_reward': reward_mean}, total_num_steps)
-            
+                    table_[1].append(round(show_rewards[agent_id], 3))
+                    logger.add_scalars('agent%i/individual_reward' % agent_id, {'individual_reward': show_rewards[agent_id]}, total_num_steps)
+                
+                logger.add_scalars('joint/reward', {'joint_reward': np.mean(show_rewards)}, total_num_steps)
+                
             if episode % args.log_console == 0:
                 print(pdtable(table_))
                 
