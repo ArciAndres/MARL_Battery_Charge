@@ -496,7 +496,7 @@ def main():
                 print("Saving gif...")
                 gif_name = gif_dir / ("step"+ str(episode)+".gif")
                 
-                generate_gif(actor_critic, args, gif_name, n_eps=3, parallel=False)
+                generate_gif(actor_critic, args, gif_name, n_eps=3, parallel=args.parallel_gif)
     
     
         # log information
