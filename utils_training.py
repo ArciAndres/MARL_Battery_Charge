@@ -40,19 +40,11 @@ def reset_rollouts(rollouts, envs, args):
             rollouts[agent_id].recurrent_hidden_states_critic = np.zeros(rollouts[agent_id].recurrent_hidden_states_critic.shape).astype(np.float32)
     
     return rollouts
-
-def gif_assembling(gif_name, images):
+    
+def gif_assembling(actor_critic, args, gif_name, n_eps = 1):
+    
     start = datetime.now()
     print(start, " - Gif assembling process started parallelly.")
-    imageio.mimsave(gif_name, np.array(images), fps=20)
-    
-    print("Gif assembling process finished. Time to completion: ", str(datetime.now() - start))
-    print(">> Gif rendering was successfully saved at: ", gif_name)
-    
-
-
-def generate_gif(actor_critic, args, gif_name, n_eps = 1, parallel=False):
-
     args = Namespace(**vars(args).copy()) # For security
     args.n_rollout_threads = 1
     num_agents = args.num_agents
@@ -189,16 +181,24 @@ def generate_gif(actor_critic, args, gif_name, n_eps = 1, parallel=False):
                             np.array(values[agent_id]),
                             rewards[:,agent_id], 
                             np.array(masks)[:,agent_id])
+                    
+    imageio.mimsave(gif_name, np.array(images), fps=20)
+    print("Gif assembling process finished. Time to completion: ", str(datetime.now() - start))       
+    print(">> Gif rendering was successfully saved at: ", gif_name)
+    
+def generate_gif(actor_critic, args, gif_name, n_eps = 1, parallel=False):
+    start = datetime.now()
+    
     if parallel:
-        proc = Process(target=gif_assembling, args=(gif_name, images))
+        proc = Process(target=gif_assembling, args=(actor_critic, args, gif_name, n_eps))
+        proc.start()
+        proc.join()
         
     else:
-        start = datetime.now()
         print(start, " - Gif assembling process started.")
-        imageio.mimsave(gif_name, np.array(images), fps=20)
-        
+        gif_assembling(actor_critic, args, gif_name, n_eps)
         print("Gif assembling process finished. Time to completion: ", str(datetime.now() - start))
-
+        print(">> Gif rendering was successfully saved at: ", gif_name)
     return str(gif_name)
 
 def load_gif(gif_name):
