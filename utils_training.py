@@ -44,7 +44,7 @@ def reset_rollouts(rollouts, envs, args):
 def gif_assembling(actor_critic, args, gif_name, n_eps = 1):
     
     start = datetime.now()
-    print(start, " - Gif assembling process started parallelly.")
+    
     args = Namespace(**vars(args).copy()) # For security
     args.n_rollout_threads = 1
     num_agents = args.num_agents
@@ -190,6 +190,7 @@ def generate_gif(actor_critic, args, gif_name, n_eps = 1, parallel=False):
     start = datetime.now()
     
     if parallel:
+        print(start, " - Gif assembling process started parallelly.")
         proc = Process(target=gif_assembling, args=(actor_critic, args, gif_name, n_eps))
         proc.start()
         proc.join()
