@@ -202,6 +202,23 @@ def generate_gif(actor_critic, args, gif_name, n_eps = 1, parallel=False):
         print(">> Gif rendering was successfully saved at: ", gif_name)
     return str(gif_name)
 
+def generate_gif_sb(model,env, args, gif_name, n_eps = 1, parallel=False):
+    # stable baselines
+    start = datetime.now()
+    
+    if parallel:
+        print(start, " - Gif assembling process started parallelly.")
+        proc = Process(target=gif_assembling, args=(actor_critic, args, gif_name, n_eps))
+        proc.start()
+        proc.join()
+        
+    else:
+        print(start, " - Gif assembling process started.")
+        gif_assembling(actor_critic, args, gif_name, n_eps)
+        print("Gif assembling process finished. Time to completion: ", str(datetime.now() - start))
+        print(">> Gif rendering was successfully saved at: ", gif_name)
+    return str(gif_name)
+
 def load_gif(gif_name):
     from IPython.display import Image
     with open(gif_name,'rb') as f:

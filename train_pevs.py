@@ -20,9 +20,7 @@ from utils.env_wrappers import SubprocVecEnv, DummyVecEnv
 from utils.util import update_linear_schedule
 from utils.storage import RolloutStorage
 from utils.single_storage import SingleRolloutStorage
-import numpy as np
 import itertools
-import os
 from pdb import set_trace
 import math
 
