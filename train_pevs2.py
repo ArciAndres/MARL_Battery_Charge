@@ -45,7 +45,7 @@ def make_env(args, rank, seed=0):
 from stable_baselines3.common.cmd_util import make_vec_env
 
 def main():
-    args = get_config(notebook=True)
+    args = get_config()
 
     #%%
     algos = {"PPO": PPO, "A2C": A2C, "TD3": TD3}
@@ -138,16 +138,19 @@ def main():
     #============= Training ========================
     eps = 1
     model = ALGO('MlpPolicy', env, verbose=1, tensorboard_log=log_dir)
+    print("============ TRAINING STARTS =============")
 
     for iteration in range(0, iterations):
-        times.append(time.time() - start)
-        model.learn(total_timesteps=args.num_env_steps)
-
+        start_it = time.time()
+        print(">> General iteration: ", iteration)
+        model.learn(total_timesteps=args.num_env_steps,learning_rate=args.lr)
+        print("Duration of iteration: ", time.time() - start_it)
+        print("Total duration: ", time.time()- start)
         gif_name = gif_dir / ("step"+ str(iteration)+".gif")
         generate_gif_sb(model, env_eval, args, gif_name=gif_name, n_eps=1 )
 
         mean_reward, std_reward  = evaluate_policy(model, env_eval, n_eval_episodes=args.eval_episodes)
-        print(">> General iteration: ", iteration)
+        
         print("Mean reward: ", mean_reward, " +/- ", std_reward)
     # %%
 if __name__ == "__main__":
