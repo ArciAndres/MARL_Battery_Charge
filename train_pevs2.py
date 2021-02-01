@@ -74,7 +74,7 @@ def main():
     # =============== Model restore ===============
 
     # We will create one environment to evaluate the agent on
-    eval_env = PEVBatteryChargeCentral(args)
+    env_eval = PEVBatteryChargeCentral(args)
 
     if args.n_rollout_threads == 1:
         # if there is only one process, there is no need to use multiprocessing
@@ -134,16 +134,15 @@ def main():
         json.dump(vars(args), f)
 
     #============= Training ========================
-    eps = 10
+    eps = 1
     model = ALGO('MlpPolicy', env, verbose=1, tensorboard_log=log_dir)
 
     for episode in range(0, eps):
         times.append(time.time() - start)
-        model.learn(total_timesteps=25000)
+        model.learn(total_timesteps=100)
 
-        if args.save_gifs:
-            gif_name = gif_dir / ("step"+ str(episode)+".gif")
-            generate_gif_sb(model, env_eval, args, gif_name=gif_name, n_eps=3 )
+        gif_name = gif_dir / ("step"+ str(episode)+".gif")
+        generate_gif_sb(model, env_eval, args, gif_name=gif_name, n_eps=3 )
 
         mean_reward, std_reward  = evaluate_policy(model, eval_env, n_eval_episodes=args.eval_episodes)
         print(">> Episode: ", episode)

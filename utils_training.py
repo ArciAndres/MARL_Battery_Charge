@@ -205,18 +205,22 @@ def generate_gif(actor_critic, args, gif_name, n_eps = 1, parallel=False):
 def generate_gif_sb(model,env, args, gif_name, n_eps = 1, parallel=False):
     # stable baselines
     start = datetime.now()
-    
-    if parallel:
-        print(start, " - Gif assembling process started parallelly.")
-        proc = Process(target=gif_assembling, args=(actor_critic, args, gif_name, n_eps))
-        proc.start()
-        proc.join()
-        
-    else:
-        print(start, " - Gif assembling process started.")
-        gif_assembling(actor_critic, args, gif_name, n_eps)
-        print("Gif assembling process finished. Time to completion: ", str(datetime.now() - start))
-        print(">> Gif rendering was successfully saved at: ", gif_name)
+
+    images = []
+    for n in range(n_eps):
+        obs = env.reset()
+        print("Render episode: ", n)
+        for i in range(args.episode_length):
+            _ = model.predict(obs)  
+            images.append(env.render(plots=[1,2,3,4,5], mode='rgb_array'))
+            if i % 10 == 0:
+                print(i, end=", ")
+        print("")
+
+    imageio.mimsave(gif_name, np.array(images), fps=20)
+    print("Gif assembling process finished. Time to completion: ", str(datetime.now() - start))       
+    print(">> Gif rendering was successfully saved at: ", gif_name)
+
     return str(gif_name)
 
 def load_gif(gif_name):
