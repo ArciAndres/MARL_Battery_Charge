@@ -211,7 +211,8 @@ def generate_gif_sb(model,env, args, gif_name, n_eps = 1, parallel=False):
         obs = env.reset()
         print("Render episode: ", n)
         for i in range(args.episode_length):
-            _ = model.predict(obs)  
+            action = model.predict(obs)
+            _ = env.step(action[0])
             images.append(env.render(plots=[1,2,3,4,5], mode='rgb_array'))
             if i % 10 == 0:
                 print(i, end=", ")

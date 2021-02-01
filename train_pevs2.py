@@ -3,6 +3,7 @@ import os
 import time
 import json
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 
 import gym
@@ -119,8 +120,9 @@ def main():
     
     start = time.time()
     
+    args.episode_length = math.floor((args.total_time/args.sampling_time))
     episodes = int(args.num_env_steps) // args.episode_length // args.n_rollout_threads
-    
+    iterations = args.iterations
     
     print("============================  TRAINING BEGINS ============================\n")
     print("Run directory:" , run_dir, '\n')
@@ -137,15 +139,15 @@ def main():
     eps = 1
     model = ALGO('MlpPolicy', env, verbose=1, tensorboard_log=log_dir)
 
-    for episode in range(0, eps):
+    for iteration in range(0, iterations):
         times.append(time.time() - start)
-        model.learn(total_timesteps=100)
+        model.learn(total_timesteps=args.num_env_steps)
 
-        gif_name = gif_dir / ("step"+ str(episode)+".gif")
-        generate_gif_sb(model, env_eval, args, gif_name=gif_name, n_eps=3 )
+        gif_name = gif_dir / ("step"+ str(iteration)+".gif")
+        generate_gif_sb(model, env_eval, args, gif_name=gif_name, n_eps=1 )
 
-        mean_reward, std_reward  = evaluate_policy(model, eval_env, n_eval_episodes=args.eval_episodes)
-        print(">> Episode: ", episode)
+        mean_reward, std_reward  = evaluate_policy(model, env_eval, n_eval_episodes=args.eval_episodes)
+        print(">> General iteration: ", iteration)
         print("Mean reward: ", mean_reward, " +/- ", std_reward)
     # %%
 if __name__ == "__main__":
