@@ -46,6 +46,7 @@ def gif_assembling(actor_critic, args, gif_name, n_eps = 1):
     start = datetime.now()
     
     args = Namespace(**vars(args).copy()) # For security
+    args.train_random = False
     args.n_rollout_threads = 1
     num_agents = args.num_agents
     

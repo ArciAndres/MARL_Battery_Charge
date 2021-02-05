@@ -137,13 +137,13 @@ def main():
 
     #============= Training ========================
     eps = 1
-    model = ALGO('MlpPolicy', env, verbose=1, tensorboard_log=log_dir)
+    model = ALGO('MlpPolicy', env, verbose=1, tensorboard_log=log_dir,learning_rate=args.lr)
     print("============ TRAINING STARTS =============")
 
     for iteration in range(0, iterations):
         start_it = time.time()
         print(">> General iteration: ", iteration)
-        model.learn(total_timesteps=args.num_env_steps,learning_rate=args.lr)
+        model.learn(total_timesteps=args.num_env_steps)
         print("Duration of iteration: ", time.time() - start_it)
         print("Total duration: ", time.time()- start)
         gif_name = gif_dir / ("step"+ str(iteration)+".gif")
